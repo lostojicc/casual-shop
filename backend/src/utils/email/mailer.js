@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
 import fs from "fs";
-import { ENV } from "../config/env.js";
+import { ENV } from "../../config/env.js";
 import path from "path";
 import { fileURLToPath } from "url";
 

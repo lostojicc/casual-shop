@@ -1,6 +1,7 @@
 import { redis } from "../config/redis.js";
-import { sendVerificationEmail } from "../email/mailer.js";
+import { sendVerificationEmail } from "../utils/email/mailer.js";
 import User from "../models/user.model.js";
+import { setCookie } from "../utils/auth-token.js";
 
 export const signUp = async (req, res) => {
     const { name, email, password} = req.body;
@@ -48,4 +49,45 @@ export const signIn = async (req, res) => {
 
 export const signOut = async (req, res) => {
     res.send("Sign Out route");
+}
+
+export const verifyEmail = async (req, res) => {
+    const { email, code } = req.body;
+    
+    try {
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({
+                success: false, 
+                message: "User was not found." 
+            });
+        } 
+
+        const verificationToken = await redis.get(`verify:${user._id}`);
+
+        if (!verificationToken || verificationToken != code) {
+            return res.status(400).json({
+                success: false,
+                message: "This code is invalid or expired."
+            });
+        }
+
+        user.isVerified = true;
+        await user.save();
+        await redis.del(`verify:${user._id}`);
+
+        // TODO: Set cookies with jwt
+        setCookie(res, user._id);
+
+        res.status(202).json({
+            success: true,
+            message: "Account successfully verified."
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Internal server error."
+        });
+    }
 }
