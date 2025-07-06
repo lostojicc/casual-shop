@@ -44,11 +44,44 @@ export const signUp = async (req, res) => {
 }
 
 export const signIn = async (req, res) => {
-    res.send("Sign In route");
+    const { email, password } = req.body;
+
+    try {
+        const user = await User.findOne({ email });
+        
+        if (!user || !(await user.comparePassword(password))) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid credentials."
+            });
+        }
+
+        if (!user.isVerified) {
+            return res.status(403).json({
+                success: false,
+                message: "Your account is not verified."
+            });
+        }
+
+        setCookie(res, user._id);
+        res.status(200).json({
+            success: true,
+            message: "You have successfully signed in."
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: error.message
+        })
+    }
 }
 
-export const signOut = async (req, res) => {
-    res.send("Sign Out route");
+export const signOut = (req, res) => {
+    res.clearCookie("accessToken");
+    res.status(200).json({
+        success: true,
+        message: "You have successfully signed out."
+    });
 }
 
 export const verifyEmail = async (req, res) => {
