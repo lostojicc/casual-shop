@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 export const setCookie = (res, userId) => {
     res.cookie("accessToken", generateToken(userId), {
         httpOnly: true,
-        secure: false,
+        secure: true,
         sameSite: "strict",
         maxAge: 24 * 60 * 60 * 1000
     });
