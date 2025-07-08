@@ -6,12 +6,14 @@ import productRoutes from "./routes/product.route.js";
 import categoryRoutes from "./routes/category.route.js";
 import cookieParser from "cookie-parser";
 import cartRoutes from "./routes/cart.route.js";
+import cors from "cors";
 
 const app = express();
 connectDB();
 
 app.use(express.json());
 app.use(cookieParser());
+app.use(cors());
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/categories", categoryRoutes);
