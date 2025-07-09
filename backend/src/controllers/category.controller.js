@@ -19,7 +19,7 @@ export const getAllCategories = async (req, res) => {
 export const getCategoryByName = async (req, res) => {
     try {
         const { name } = req.params;
-        const category = await Category.find({ name })[0];
+        const category = await Category.find({ name });
 
         if (!category) {
             return res.status(404).json({
@@ -30,7 +30,7 @@ export const getCategoryByName = async (req, res) => {
 
         res.status(200).json({
             success: true,
-            category
+            category: category[0]
         });
     } catch (error) {
         console.log(error.message);

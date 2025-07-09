@@ -108,9 +108,9 @@ const Category = () => {
             >
                 {/* Hero Section with Background Image */}
                 <HeroSection
-                    image={category[0].image}
-                    title={category[0].name}
-                    description={category[0].description}
+                    image={category.image}
+                    title={category.name}
+                    description={category.description}
                     buttonText="Products"
                     onButtonPress={scrollToProducts}
                     imageOpacity={imageOpacity}
