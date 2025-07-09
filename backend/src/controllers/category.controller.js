@@ -19,7 +19,7 @@ export const getAllCategories = async (req, res) => {
 export const getCategoryByName = async (req, res) => {
     try {
         const { name } = req.params;
-        const category = await Category.find({ name });
+        const category = await Category.find({ name })[0];
 
         if (!category) {
             return res.status(404).json({
