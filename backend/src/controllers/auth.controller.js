@@ -41,7 +41,7 @@ export const signUp = async (req, res) => {
             message: error.message
         });
     }
-}
+};
 
 export const signIn = async (req, res) => {
     const { email, password } = req.body;
@@ -78,7 +78,7 @@ export const signIn = async (req, res) => {
             message: error.message
         });
     }
-}
+};
 
 export const signOut = (req, res) => {
     res.clearCookie("accessToken");
@@ -86,7 +86,7 @@ export const signOut = (req, res) => {
         success: true,
         message: "You have successfully signed out."
     });
-}
+};
 
 export const verifyEmail = async (req, res) => {
     const { email, code } = req.body;
@@ -127,4 +127,13 @@ export const verifyEmail = async (req, res) => {
             message: "Internal server error."
         });
     }
-}
+};
+
+export const checkAuth = (req, res) => {
+    try {
+        res.status(200).json({ success: true, user: req.user });
+    } catch (error) {
+        console.log("Error in checkAuth controller", error.message);
+        res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+};
