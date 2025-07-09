@@ -9,11 +9,11 @@ import {
   StatusBar,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import "../../../assets/global.css";
-import Header from '../../../components/Header.jsx';
-import HeroSection from '../../../components/HeroSection';
-import { useCategories } from "../../../hooks/useCategories.js";
-import CategoryCard from "../../../components/CategoryCard";
+import "../../assets/global.css";
+import Header from '../../components/Header.jsx';
+import HeroSection from '../../components/HeroSection';
+import { useCategories } from "../../hooks/useCategories.js";
+import CategoryCard from "../../components/CategoryCard";
 
 const { width, height } = Dimensions.get('window');
 
@@ -67,7 +67,7 @@ export default function HomePage() {
   };
 
   const { categories, loading, error } = useCategories();
-
+  
   return (
     <View className="flex-1 bg-black">
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
@@ -115,7 +115,7 @@ export default function HomePage() {
       >
         {/* Hero Section with Background Image */}
         <HeroSection
-          image={require('../../../assets/images/hero.jpg')}
+          image={require('../../assets/images/hero.jpg')}
           title="Welcome to Casual Shop!"
           description={
             "Born from the terraces, built for the streets.\n" +
@@ -146,9 +146,7 @@ export default function HomePage() {
           {categories.map(cat => (
             <CategoryCard
               key={cat._id}
-              category={cat}
-              onPress={() => navigation.navigate('Category', { category: cat })}
-            />
+              category={cat}/>
           ))}
         </View>
       </ScrollView>

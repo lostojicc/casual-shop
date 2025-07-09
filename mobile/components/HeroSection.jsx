@@ -19,7 +19,7 @@ export default function HeroSection({
   height,
 }) {
   return (
-    <View style={{ height: height || windowHeight }}>
+    <View style={{ height: height || windowHeight, backgroundColor: 'black' }}>
       {/* Background Image with overlays */}
       <Animated.View
         style={{
