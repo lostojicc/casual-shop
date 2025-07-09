@@ -66,13 +66,17 @@ export const signIn = async (req, res) => {
         setCookie(res, user._id);
         res.status(200).json({
             success: true,
-            message: "You have successfully signed in."
+            message: "You have successfully signed in.",
+            user: {
+				...user._doc,
+				password: undefined,
+			}
         });
     } catch (error) {
         res.status(500).json({
             success: false,
-            error: error.message
-        })
+            message: error.message
+        });
     }
 }
 
