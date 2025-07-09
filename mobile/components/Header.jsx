@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-export default function Header({ isScrolled = false, insets = { top: 0 }, opacity = 1, style = {} }) {
+export default function Header({ isScrolled = false, opacity = 1, style = {} }) {
   return (
     <Animated.View
       style={[
@@ -12,7 +12,7 @@ export default function Header({ isScrolled = false, insets = { top: 0 }, opacit
           left: 0,
           right: 0,
           zIndex: 1000,
-          paddingTop: insets.top,
+          paddingTop: 15,
           paddingHorizontal: 20,
           paddingBottom: 15,
           backgroundColor: isScrolled ? 'black' : 'transparent',

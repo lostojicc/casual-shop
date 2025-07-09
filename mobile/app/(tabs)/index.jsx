@@ -7,13 +7,15 @@ import {
   Animated,
   Dimensions,
   StatusBar,
+  ActivityIndicator,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import "../../assets/global.css";
 import Header from '../../components/Header.jsx';
 import HeroSection from '../../components/HeroSection';
-import { useCategories } from "../../hooks/useCategories.js";
+import useFetch from "../../hooks/useFetch.js";
 import CategoryCard from "../../components/CategoryCard";
+import { getAllCategories } from "../../api/categories.js";
 
 const { width, height } = Dimensions.get('window');
 
@@ -21,7 +23,6 @@ export default function HomePage() {
   const [scrollY] = useState(new Animated.Value(0));
   const [isScrolled, setIsScrolled] = useState(false);
   const scrollViewRef = useRef(null);
-  const insets = useSafeAreaInsets();
 
   // Animation values
   const headerOpacity = scrollY.interpolate({
@@ -66,8 +67,8 @@ export default function HomePage() {
     });
   };
 
-  const { categories, loading, error } = useCategories();
-  
+  const { data: categories, loading: categoriesLoading, error: categoriesError } = useFetch(() => getAllCategories());
+
   return (
     <View className="flex-1 bg-black">
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
@@ -84,7 +85,6 @@ export default function HomePage() {
       >
         <Header
           isScrolled={isScrolled}
-          insets={insets}
           opacity={headerOpacity}
         />
       </Animated.View>
@@ -101,7 +101,6 @@ export default function HomePage() {
       >
         <Header
           isScrolled={false}
-          insets={insets}
           opacity={Animated.subtract(1, headerOpacity)}
         />
       </Animated.View>
@@ -126,7 +125,7 @@ export default function HomePage() {
           imageOpacity={imageOpacity}
           imageScale={imageScale}
           textOpacity={textOpacity}
-          height={height + insets.bottom}
+          height={height}
         >
           {/* Read More button only for HomePage */}
           <TouchableOpacity 
@@ -142,13 +141,20 @@ export default function HomePage() {
         </HeroSection>
 
         {/* White Section */}
-        <View className="bg-white">
-          {categories.map(cat => (
-            <CategoryCard
-              key={cat._id}
-              category={cat}/>
-          ))}
-        </View>
+             
+          {categoriesLoading ? (
+              <ActivityIndicator />
+          ) : categoriesError ? (
+              <Text>Error: {categoriesError}</Text>
+          ) : (
+            <View className="bg-white">  
+                  {categories?.map(cat => (
+                    <CategoryCard
+                      key={cat._id}
+                      category={cat}/>
+                  ))}
+            </View>
+          )}
       </ScrollView>
      </View>
   );

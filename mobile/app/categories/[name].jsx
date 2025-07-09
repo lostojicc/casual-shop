@@ -1,21 +1,31 @@
-import { View, Text, Animated, StatusBar, ScrollView, ActivityIndicator, Dimensions } from 'react-native'
+import { View, Text, Animated, StatusBar, ScrollView, ActivityIndicator, Dimensions, FlatList } from 'react-native'
 import React, { useRef, useState } from 'react'
 import { useLocalSearchParams } from 'expo-router';
-import { useCategory } from '../../hooks/useCategory';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Header from '../../components/Header';
 import HeroSection from '../../components/HeroSection';
+import useFetch from '../../hooks/useFetch';
+import { fetchProductsByCategory } from '../../api/products';
+import ProductCard from '../../components/ProductCard';
+import { useEffect } from 'react';
+import { getCategoryByName } from '../../api/categories';
 
 const { width, height } = Dimensions.get('window');
 
 const Category = () => {
     const { name } = useLocalSearchParams();
-    const { category, loading, error } = useCategory(name);
+    const { data: category, loading: categoryLoading, error: categoryError } = useFetch(() => getCategoryByName(name));
+    const { data: products, loading: productsLoading, error: productsError, refetch, reset } = useFetch(() => fetchProductsByCategory(category?._id), false); 
+    useEffect(() => {
+        if (category?._id) 
+            refetch();
+        else
+            reset();
+    }, [category?._id]);
 
     const [scrollY] = useState(new Animated.Value(0));
     const [isScrolled, setIsScrolled] = useState(false);
     const scrollViewRef = useRef(null);
-    const insets = useSafeAreaInsets();
 
     // Animation values
     const headerOpacity = scrollY.interpolate({
@@ -60,72 +70,88 @@ const Category = () => {
         });
     };
 
-    if (!category) return (<ActivityIndicator></ActivityIndicator>)
-
     return (
-        <View className="flex-1 bg-black">
-            <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
-            {/* Dynamic Header */}
-            <Animated.View
-                style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                zIndex: 1000,
-                }}
-            >
-                <Header
-                isScrolled={isScrolled}
-                insets={insets}
-                opacity={headerOpacity}
-                />
-            </Animated.View>
+        <>
+            {categoryLoading ? (
+                <ActivityIndicator />
+            ) : categoryError ? (
+                <Text>Error: {categoryError}</Text>
+            ) : (
+                <View className="flex-1 bg-black">
+                    <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+                    {/* Dynamic Header */}
+                    <Animated.View
+                        style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        zIndex: 1000,
+                        }}
+                    >
+                        <Header
+                        isScrolled={isScrolled}
+                        opacity={headerOpacity}
+                        />
+                    </Animated.View>
 
-            {/* Transparent Header (when not scrolled) */}
-            <Animated.View
-                style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                zIndex: 999,
-                }}
-            >
-                <Header
-                isScrolled={false}
-                insets={insets}
-                opacity={Animated.subtract(1, headerOpacity)}
-                />
-            </Animated.View>
+                    {/* Transparent Header (when not scrolled) */}
+                    <Animated.View
+                        style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        zIndex: 999,
+                        }}
+                    >
+                        <Header
+                        isScrolled={false}
+                        opacity={Animated.subtract(1, headerOpacity)}
+                        />
+                    </Animated.View>
 
-            <ScrollView
-                ref={scrollViewRef}
-                onScroll={handleScroll}
-                scrollEventThrottle={16}
-                showsVerticalScrollIndicator={false}
-                className="flex-1"
-            >
-                {/* Hero Section with Background Image */}
-                <HeroSection
-                    image={category.image}
-                    title={category.name}
-                    description={category.description}
-                    buttonText="Products"
-                    onButtonPress={scrollToProducts}
-                    imageOpacity={imageOpacity}
-                    imageScale={imageScale}
-                    textOpacity={textOpacity}
-                    height={height + insets.bottom}
-                />
+                    <ScrollView
+                        ref={scrollViewRef}
+                        onScroll={handleScroll}
+                        scrollEventThrottle={16}
+                        showsVerticalScrollIndicator={false}
+                        className="flex-1"
+                    >
+                        {/* Hero Section with Background Image */}
+                        <HeroSection
+                            image={category?.image}
+                            title={category?.name}
+                            description={category?.description}
+                            buttonText="Products"
+                            onButtonPress={scrollToProducts}
+                            imageOpacity={imageOpacity}
+                            imageScale={imageScale}
+                            textOpacity={textOpacity}
+                            height={height}
+                        />
 
-                {/* White Section */}
-                <View className="bg-white">
-                
+                        {/* White Section */}
+                        <View className="bg-white p-2">
+                            {productsLoading ? (
+                                <ActivityIndicator />
+                            ) : productsError ? (
+                                <Text>Error: {productsError}</Text>
+                            ) : (
+                                <View className="flex-row flex-wrap">
+                                    {products?.map(product => (
+                                        <View key={product._id} className="w-1/2 p-2">
+                                            <ProductCard product={product}/>
+                                        </View>
+                                    ))}
+                                </View>
+                            )}
+                        </View>
+                    </ScrollView>
                 </View>
-            </ScrollView>
-        </View>
+            )}
+        </>
     )
-}
+};
 
 export default Category
