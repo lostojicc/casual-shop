@@ -44,7 +44,7 @@ const signin = () => {
               placeholder="you@example.com"
               keyboardType="email-address"
               autoCapitalize="none"
-              className="w-full rounded-none bg-white px-3 py-2 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:border-black-600"
+              className="w-full rounded-none bg-white px-3 py-2 text-base text-gray-900 border border-gray-300 focus:border-black-600"
             />
           </View>
 
@@ -61,7 +61,7 @@ const signin = () => {
               onChangeText={setPassword}
               placeholder="••••••••"
               secureTextEntry
-              className="w-full rounded-none bg-white px-3 py-2 text-base text-gray-900 border border-gray-300 placeholder:text-gray-400 focus:border-black-600"
+              className="w-full rounded-none bg-white px-3 py-2 text-base text-gray-900 border border-gray-300 focus:border-black-600"
             />
           </View>
 

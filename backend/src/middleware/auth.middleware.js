@@ -2,43 +2,24 @@ import { decodeToken } from "../utils/auth-token.js";
 import User from "../models/user.model.js";
 
 export const protectRoute = async (req, res, next) => {
-    try {
-        const accessToken = req.cookies.accessToken;
-        
-        if (!accessToken) {
-            return res.status(401).json({
-                success: false,
-                message: "You are not authenticated."
-            });
-        }
+  try {
+    // get token
+    const token = req.header("Authorization").replace("Bearer ", "");
+    if (!token) return res.status(401).json({ message: "No authentication token, access denied" });
 
-        try {
-            const decoded = decodeToken(accessToken);
+    // verify token
+    const decoded = decodeToken(token);
 
-            const user = await User.findById(decoded.userId).select("-password");
+    // find user
+    const user = await User.findById(decoded.userId).select("-password");
+    if (!user) return res.status(401).json({ message: "Token is not valid" });
 
-            if (!user) {
-                return res.status(404).json({
-                    success: false,
-                    message: "User not found"
-                });
-            }
-
-            req.user = user;
-            next();
-        } catch (error) {
-            if (error.name === "TokenExpiredError") {
-				return res.status(401).json({ message: "Unauthorized - Access token expired" });
-			}
-			throw error;
-        }
-    } catch (error) {
-        console.log(error.message);
-        res.status(500).json({
-            success: false,
-            message: "Internal server error"
-        });
-    }
+    req.user = user;
+    next();
+  } catch (error) {
+    console.error("Authentication error:", error.message);
+    res.status(401).json({ message: "Token is not valid" });
+  }
 };
 
 export const adminRoute = (req, res, next) => {

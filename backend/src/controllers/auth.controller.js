@@ -1,10 +1,10 @@
 import { redis } from "../config/redis.js";
 import { sendVerificationEmail } from "../utils/email/mailer.js";
 import User from "../models/user.model.js";
-import { setCookie } from "../utils/auth-token.js";
+import { generateToken } from "../utils/auth-token.js";
 
 export const signUp = async (req, res) => {
-    const { name, email, password} = req.body;
+    const { name, email, password } = req.body;
     
     try {
         const userAlreadyExists = await User.findOne({ email });
@@ -63,29 +63,24 @@ export const signIn = async (req, res) => {
             });
         }
 
-        setCookie(res, user._id);
+        const token = generateToken(user._id);
+
         res.status(200).json({
             success: true,
             message: "You have successfully signed in.",
             user: {
 				...user._doc,
 				password: undefined,
-			}
+			},
+            token
         });
     } catch (error) {
+        console.log(error.message);
         res.status(500).json({
             success: false,
-            message: error.message
+            message: "Internal server error"
         });
     }
-};
-
-export const signOut = (req, res) => {
-    res.clearCookie("accessToken");
-    res.status(200).json({
-        success: true,
-        message: "You have successfully signed out."
-    });
 };
 
 export const verifyEmail = async (req, res) => {
@@ -114,14 +109,18 @@ export const verifyEmail = async (req, res) => {
         await user.save();
         await redis.del(`verify:${user._id}`);
 
-        // TODO: Set cookies with jwt
-        setCookie(res, user._id);
 
         res.status(202).json({
             success: true,
-            message: "Account successfully verified."
+            message: "Account successfully verified.",
+            user: {
+				...user._doc,
+				password: undefined,
+			},
+            token
         });
     } catch (error) {
+        console.log(error.message);
         res.status(500).json({
             success: false,
             message: "Internal server error."
@@ -133,7 +132,7 @@ export const checkAuth = (req, res) => {
     try {
         res.status(200).json({ success: true, user: req.user });
     } catch (error) {
-        console.log("Error in checkAuth controller", error.message);
+        console.log(error.message);
         res.status(500).json({ success: false, message: "Internal Server Error" });
     }
 };
