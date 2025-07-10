@@ -16,6 +16,8 @@ import HeroSection from '../../components/HeroSection';
 import useFetch from "../../hooks/useFetch.js";
 import CategoryCard from "../../components/CategoryCard";
 import { getAllCategories } from "../../api/categories.js";
+import { Link } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width, height } = Dimensions.get('window');
 
@@ -59,6 +61,11 @@ export default function HomePage() {
       },
     }
   );
+
+  const signOut = async () => {
+    await AsyncStorage.clear();
+    console.log(await AsyncStorage.getItem("accessToken"));
+  }
 
   const scrollToCategories = () => {
     scrollViewRef.current?.scrollTo({
@@ -155,6 +162,12 @@ export default function HomePage() {
                   ))}
             </View>
           )}
+
+          <Link href="/(auth)/signin" className='text-white'>Sign In</Link>
+          <Link href="/cart" className='text-white'>Cart</Link>
+          <TouchableOpacity onPress={signOut}>
+            <Text className='text-white'>Sign out</Text>
+          </TouchableOpacity>
       </ScrollView>
      </View>
   );

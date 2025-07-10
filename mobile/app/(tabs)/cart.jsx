@@ -1,16 +1,18 @@
 import { View, Text } from 'react-native'
-import React, { useEffect } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import { useAuthStore } from '../../store/authStore'
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 
 const cart = () => {
-    const { isAuthenticated, isCheckingAuth } = useAuthStore();
+    const { token, isCheckingAuth } = useAuthStore();
     const router = useRouter();
     
-    useEffect(() => {
-        if (!isCheckingAuth && !isAuthenticated)
+    useFocusEffect(useCallback(() => {
+        if (!isCheckingAuth && !token)
             router.replace("/signin");
-    }, [isAuthenticated, isCheckingAuth]);
+        console.log(isCheckingAuth)
+        console.log(token);
+    }, [token, isCheckingAuth]));
     return (
         <View>
         <Text>cart</Text>

@@ -1,9 +1,10 @@
 import { create } from "zustand";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "../utils/api";
 
 export const useAuthStore = create((set, get) => ({
     user: null,
-    isAuthenticated: false,
+    token: null,
     error: null,
     isLoading: false,
     isCheckingAuth: true,
@@ -12,14 +13,9 @@ export const useAuthStore = create((set, get) => ({
     signUp: async (data) => {
         set({ isLoading: true, error: null });
         try {
-            const response = await api.post("/auth/signup", data);
-            
-            if (response.data.success) {
-                set({ verificationEmail: userData.email, isLoading: false });
-                return true;
-            }
-        
-            set({ error: response.data.message, isLoading: false });
+            await api.post("/auth/signup", data);
+            set({ verificationEmail: data.email, isLoading: false });
+            return true;
         } catch (error) {
             const errorMessage = error.response?.data?.message || "Sign up failed";
             set({ error: errorMessage, isLoading: false });
@@ -30,38 +26,31 @@ export const useAuthStore = create((set, get) => ({
         set({ isLoading: true, error: null });
         try {
             const response = await api.post("/auth/signin", credentials);
+
+            await AsyncStorage.setItem("accessToken", response.data.token);
             
-            if (response.data.success) {
-                set({ user: response.data.user, isAuthenticated: true });
-                console.log(user);
-            }
-                
-            else if (response.status == 403) {
-                set({ verificationEmail: credentials.email, isLoading: false });
-                return true;
-            } else 
-                set({ error: response.data.message });
-            
-            set({ isLoading: false });
+            set({ user: response.data.user, token: response.data.token, isLoading: false });   
+            // else if (response.status == 403) {
+            //     set({ verificationEmail: credentials.email, isLoading: false });
+            //     return true;
         } catch (error) {
-            // Handle different error scenarios
-            const errorMessage = error.response?.data?.message;
+            let needVerification = undefined;
+
+            if (error.response && error.response.status === 403) {
+                set({ verificationEmail: credentials.email });
+                needVerification = true;
+            }
+
+            const errorMessage = error.response.data.message;
             set({ error: errorMessage, isLoading: false });
+            return needVerification;
         }
     },
 
     // Sign Out Action
     signOut: async () => {
-        set({ isLoading: true, error: null });
-        try {
-            await api.post("/auth/signout");
-        } catch (error) {
-            // Even if the API call fails, we should still sign out locally
-            const errorMessage = error.response?.data?.message;
-            set({ error: errorMessage, isLoading: false });
-        } finally {
-            get().reset();
-        }
+        await AsyncStorage.removeItem("accessToken");
+        set({ token: null, user: null });
     },
 
     // Verify Email Action
@@ -100,21 +89,15 @@ export const useAuthStore = create((set, get) => ({
     checkAuth: async () => {
 		set({ isCheckingAuth: true, error: null });
 		try {
-			const response = await api.get("/auth/check");
-			set({ user: response.data.user, isAuthenticated: true, isCheckingAuth: false });
+            const token = await AsyncStorage.getItem("accessToken");
+			const response = await api.get("/auth/check", {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+			set({ user: response.data.user, isCheckingAuth: false, token });
 		} catch (error) {
-			set({ error: null, isCheckingAuth: false, isAuthenticated: false });
-		}
-	},
-
-    // // Reset store state
-    reset: () => set({
-        user: null,
-        isAuthenticated: false,
-        error: null,
-        isLoading: false,
-        isCheckingAuth: true,
-        message: null,
-        verificationEmail: null
-    })
+			await get().signOut();
+		} finally {
+            set({ isCheckingAuth: false });
+        }
+	}
 }));

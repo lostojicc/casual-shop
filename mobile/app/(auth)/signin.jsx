@@ -9,7 +9,7 @@ const signin = () => {
     const { signIn, isLoading, user } = useAuthStore();
 
     const handleSignIn = async () => {
-        const needVerification = await signIn({email, password});
+        const needVerification = await signIn({ email, password });
 
         if (!needVerification){
             console.log("Signed in");
@@ -26,7 +26,7 @@ const signin = () => {
       <View className="w-full max-w-sm self-center">
         <Image
           source={require("../../assets/images/logo.png")}
-          className="h-10 w-10 mx-auto mb-2"
+          className="h-20 w-20 mx-auto mb-2"
           resizeMode="contain"
         />
         <Text className="text-center text-2xl font-bold tracking-tight text-gray-900 mt-4">
@@ -67,16 +67,7 @@ const signin = () => {
 
           {/* Submit button with cool gradient */}
           <TouchableOpacity
-            className="w-full py-3 rounded-none items-center shadow-lg shadow-black"
-            style={{
-              backgroundColor: 'transparent',
-              background: 'linear-gradient(90deg, #000000 0%, #444444 50%, #000000 100%)',
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.25,
-              shadowRadius: 3.84,
-              elevation: 5,
-            }}
+            className="w-full py-3 rounded-none items-center bg-black shadow-lg shadow-black"
             onPress={() => handleSignIn()}
           >
             <Text className="text-white font-semibold text-sm">Sign in</Text>
