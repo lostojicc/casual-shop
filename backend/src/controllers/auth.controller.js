@@ -108,7 +108,7 @@ export const verifyEmail = async (req, res) => {
         user.isVerified = true;
         await user.save();
         await redis.del(`verify:${user._id}`);
-
+        const token = generateToken(user._id);
 
         res.status(202).json({
             success: true,
