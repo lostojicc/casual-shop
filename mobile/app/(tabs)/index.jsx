@@ -165,6 +165,7 @@ export default function HomePage() {
 
           <Link href="/(auth)/signin" className='text-white'>Sign In</Link>
           <Link href="/cart" className='text-white'>Cart</Link>
+          <Link href="/(auth)/verify" className='text-white'>Verify</Link>
           <TouchableOpacity onPress={signOut}>
             <Text className='text-white'>Sign out</Text>
           </TouchableOpacity>

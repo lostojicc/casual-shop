@@ -10,6 +10,8 @@ export const useAuthStore = create((set, get) => ({
     isCheckingAuth: true,
     verificationEmail: null,
 
+    clearError: () => set({ error: null }),
+
     signUp: async (data) => {
         set({ isLoading: true, error: null });
         try {
@@ -30,9 +32,6 @@ export const useAuthStore = create((set, get) => ({
             await AsyncStorage.setItem("accessToken", response.data.token);
             
             set({ user: response.data.user, token: response.data.token, isLoading: false });   
-            // else if (response.status == 403) {
-            //     set({ verificationEmail: credentials.email, isLoading: false });
-            //     return true;
         } catch (error) {
             let needVerification = undefined;
 
@@ -47,45 +46,39 @@ export const useAuthStore = create((set, get) => ({
         }
     },
 
-    // Sign Out Action
     signOut: async () => {
         await AsyncStorage.removeItem("accessToken");
         set({ token: null, user: null });
     },
 
-    // Verify Email Action
-    // verifyEmail: async (code) => {
-    //     const { verificationEmail } = get();
-    //     if (!verificationEmail) {
-    //         set({ error: "No email found for verification" });
-    //         return { success: false, error: "No email found for verification" };
-    //     }
+    verifyEmail: async (code) => {
+        const { verificationEmail } = get();
+        if (!verificationEmail) {
+            set({ error: "No email found for verification" });
+            return false;
+        }
 
-    //     set({ isLoading: true, error: null });
-    //     try {
-    //         const response = await api.post("/auth/verify-email", {
-    //             email: verificationEmail,
-    //             code
-    //         });
+        set({ isLoading: true, error: null });
+        try {
+            const response = await api.post("/auth/verify-email", {
+                email: verificationEmail,
+                code
+            });
+            set({
+                user: response.data.user,
+                token: response.data.token,
+                verificationEmail: null,
+                isLoading: false
+            });
 
-    //         if (response.data.success) {
-    //             set({
-    //                 user: { email: verificationEmail },
-    //                 isAuthenticated: true,
-    //                 verificationEmail: null,
-    //                 isLoading: false,
-    //                 message: response.data.message
-    //             });
-    //             return { success: true };
-    //         }
-    //     } catch (error) {
-    //         const errorMessage = error.response?.data?.message || "Verification failed";
-    //         set({ error: errorMessage, isLoading: false });
-    //         return { success: false, error: errorMessage };
-    //     }
-    // },
+            return true;
+        } catch (error) {
+            const errorMessage = error.response?.data?.message || "Verification failed";
+            set({ error: errorMessage, isLoading: false });
+            return false;
+        }
+    },
 
-    // Check Authentication Status
     checkAuth: async () => {
 		set({ isCheckingAuth: true, error: null });
 		try {
