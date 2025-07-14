@@ -4,8 +4,14 @@ import User from "../models/user.model.js";
 export const protectRoute = async (req, res, next) => {
   try {
     // get token
-    const token = req.header("Authorization").replace("Bearer ", "");
-    if (!token) return res.status(401).json({ message: "No authentication token, access denied" });
+    const authHeader = req.header("Authorization");
+    if (!authHeader) {
+      return res.status(401).json({ message: "No authentication token, access denied" });
+    }
+    const token = authHeader.replace("Bearer ", "");
+    if (!token) {
+      return res.status(401).json({ message: "No authentication token, access denied" });
+    }
 
     // verify token
     const decoded = decodeToken(token);
