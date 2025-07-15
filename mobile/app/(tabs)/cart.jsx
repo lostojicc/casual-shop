@@ -10,8 +10,6 @@ const cart = () => {
     useFocusEffect(useCallback(() => {
         if (!isCheckingAuth && !token)
             router.replace("/signin");
-        console.log(isCheckingAuth)
-        console.log(token);
     }, [token, isCheckingAuth]));
     return (
         <View>

@@ -32,6 +32,7 @@ export const useAuthStore = create((set, get) => ({
             await AsyncStorage.setItem("accessToken", response.data.token);
             
             set({ user: response.data.user, token: response.data.token, isLoading: false });   
+            return false;
         } catch (error) {
             let needVerification = undefined;
 
