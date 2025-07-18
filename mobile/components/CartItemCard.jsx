@@ -1,26 +1,16 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import { Image, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useCartStore } from '../store/cartStore.js';
+import { useAuthStore } from '../store/authStore.js';
 
-const CartItemCard = ({ item = {}, refetch }) => {
-  const [quantity, setQuantity] = useState(item.quantity || 1);
+const CartItemCard = ({ item }) => {
   const brand = item.brand || 'Brand';
   const name = item.name || 'Product Name';
   const price = item.price || 99.99;
   const imageUrl = item.image || 'https://via.placeholder.com/80x80.png?text=Img';
-
-  // Unified handler for all quantity changes
-  const handleQuantityChange = async (newQuantity) => {
-    setQuantity(newQuantity);
-    // Placeholder: call your API to update quantity in the database
-    // await updateCartItemQuantity(item._id, safeQuantity);
-    if (refetch) refetch();
-  };
-
-  const handleInputChange = (text) => {
-    const num = parseInt(text.replace(/[^0-9]/g, ''), 10);
-    handleQuantityChange(isNaN(num) ? 1 : num);
-  };
+  const { updateQuantity, removeFromCart } = useCartStore();
+  const { token } = useAuthStore();
 
   return (
     <View className="flex-row items-center bg-white mx-auto my-4 w-11/12 shadow-lg shadow-black px-2 py-3">
@@ -37,24 +27,20 @@ const CartItemCard = ({ item = {}, refetch }) => {
       </View>
       {/* Quantity Controls */}
       <View className="flex-row items-center mr-2 border border-black px-1 py-0.5">
-        <TouchableOpacity onPress={() => handleQuantityChange(quantity - 1)} className="px-1">
+        <TouchableOpacity onPress={() => updateQuantity(item._id, item.quantity - 1, token)} className="px-1">
           <Ionicons name="remove" size={18} color="black" />
         </TouchableOpacity>
-        <TextInput
+        <Text
           className="w-8 text-center text-black mx-1 p-0"
-          keyboardType="number-pad"
-          value={quantity.toString()}
-          onChangeText={handleInputChange}
-          maxLength={3}
-        />
-        <TouchableOpacity onPress={() => handleQuantityChange(quantity + 1)} className="px-1">
+        >{item.quantity}</Text>
+        <TouchableOpacity onPress={() => updateQuantity(item._id, item.quantity + 1, token)} className="px-1">
           <Ionicons name="add" size={18} color="black" />
         </TouchableOpacity>
       </View>
       {/* Price */}
-      <Text className="text-black text-base font-bold mr-3 min-w-[48px] text-right">${price}</Text>
+      <Text className="text-black text-base font-bold mr-3 min-w-[48px] text-right">€{price}</Text>
       {/* Trash Icon */}
-      <TouchableOpacity className="pl-2">
+      <TouchableOpacity className="pl-2" onPress={() => removeFromCart(item._id, token)}>
         <Ionicons name="trash" size={22} color="black" />
       </TouchableOpacity>
     </View>

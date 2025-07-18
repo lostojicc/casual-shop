@@ -2,8 +2,12 @@ import { View, Text, TouchableOpacity } from 'react-native'
 import React from 'react'
 import { Image } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
+import { useCartStore } from '../store/cartStore.js'
+import { useAuthStore } from '../store/authStore.js'
 
 const ProductCard = ({product}) => {
+    const { addToCart } = useCartStore();
+    const { token } = useAuthStore();
   return (
     <TouchableOpacity className="w-full h-80 bg-white shadow-lg shadow-black rounded-none overflow-hidden relative">
         <View className="h-1/2 w-full">
@@ -21,6 +25,7 @@ const ProductCard = ({product}) => {
 
         <TouchableOpacity
             className="absolute top-1/2 left-1/2 translate-x-1/2 -translate-y-1/2 bg-black w-16 h-16 rounded-full items-center justify-center border-4 border-white"
+            onPress={() => addToCart(product, token)}
         >
             <Ionicons name="cart" size={28} color="white" />
         </TouchableOpacity>

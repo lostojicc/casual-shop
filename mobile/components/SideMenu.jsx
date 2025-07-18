@@ -1,10 +1,10 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, Animated, Dimensions } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
-import { usePathname, useRouter } from 'expo-router';
-import { useRoute } from '@react-navigation/native';
 import { useAuthStore } from '@/store/authStore';
+import { useCartStore } from '@/store/cartStore';
+import { Ionicons } from '@expo/vector-icons';
+import { useRoute } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
+import React from 'react';
+import { Animated, Dimensions, Text, TouchableOpacity, View } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
 
@@ -12,6 +12,7 @@ export default function SideMenu({ isVisible, onClose, animatedValue, onCloseIns
   const currentRoute = useRoute();
   const router = useRouter();
   const { user, signOut } = useAuthStore();
+  const cart = useCartStore(state => state.cart);
   
   const menuTranslateX = animatedValue.interpolate({
     inputRange: [0, 1],
@@ -24,7 +25,7 @@ export default function SideMenu({ isVisible, onClose, animatedValue, onCloseIns
   });
 
   const menuItems = [
-    { icon: 'home', label: 'Home', route: 'index' },
+    { icon: 'home', label: 'Home', route: '' },
     { icon: 'cart', label: 'Cart', route: 'cart' },
     { icon: 'person', label: 'Profile', route: 'profile' },
     { icon: 'information-circle', label: 'About', route: 'about' }
@@ -104,11 +105,20 @@ export default function SideMenu({ isVisible, onClose, animatedValue, onCloseIns
                   navigate(item.route);
                 }}
               >
-                <Ionicons 
-                  name={item.icon} 
-                  size={20} 
-                  color={isActive ? 'black' : 'white'} 
-                />
+                <View className="relative">
+                  <Ionicons 
+                    name={item.icon} 
+                    size={20} 
+                    color={isActive ? 'black' : 'white'} 
+                  />
+                  {item.icon === 'cart' && cart.length > 0 && (
+                    <View className={`absolute -top-1 -right-1 w-4 h-4 border ${isActive ? "bg-black border-white" : "bg-white border-black"} rounded-full items-center justify-center`}>
+                      <Text className={`text-xs ${isActive ? "text-white" : "text-black"}`}>
+                        {cart.length > 99 ? '99+' : cart.length}
+                      </Text>
+                    </View>
+                  )}
+                </View>
                 <Text className={`text-lg ml-4 ${
                   isActive ? 'text-black' : 'text-white'
                 }`}>

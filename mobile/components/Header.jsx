@@ -1,6 +1,7 @@
-import React, { useState, useRef } from 'react';
-import { View, Text, TouchableOpacity, Animated, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import React, { useRef, useState } from 'react';
+import { Animated, Dimensions, Text, TouchableOpacity, View } from 'react-native';
+import { useCartStore } from '../store/cartStore';
 import SideMenu from './SideMenu';
 
 const { width, height } = Dimensions.get('window');
@@ -8,6 +9,7 @@ const { width, height } = Dimensions.get('window');
 export default function Header({ isScrolled = false, opacity = 1, style = {} }) {
   const [isMenuVisible, setIsMenuVisible] = useState(false);
   const menuAnimation = useRef(new Animated.Value(0)).current;
+  const cart = useCartStore(state => state.cart);
 
   const toggleMenu = () => {
     if (isMenuVisible) {
@@ -67,9 +69,13 @@ export default function Header({ isScrolled = false, opacity = 1, style = {} }) 
             </View>
             <Text className="text-white font-bold text-lg">Casual Shop</Text>
           </View>
-          {/* Hamburger Menu */}
-          <TouchableOpacity className="p-2" onPress={toggleMenu}>
-            <Ionicons name="menu" size={24} color="white" />
+          {/* Hamburger Menu with Cart Badge */}
+          <TouchableOpacity className="p-2 relative" onPress={toggleMenu}>
+                          <Ionicons name="menu" size={24} color="white" />
+              {cart.length > 0 && (
+                <View className="absolute top-1.5 right-1.5 w-3 h-3 bg-white border border-black rounded-full items-center justify-center">
+                </View>
+              )}
           </TouchableOpacity>
         </View>
       </Animated.View>

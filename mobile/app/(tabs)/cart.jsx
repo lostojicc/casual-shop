@@ -4,10 +4,10 @@ import { ActivityIndicator, FlatList, Text, View } from 'react-native';
 import CartItemCard from '../../components/CartItemCard';
 import Header from "../../components/Header";
 import { useAuthStore } from '../../store/authStore.js';
-import useFetch from "../../hooks/useFetch.js";
-import { getCartItems } from '../../api/cart.js';
+import { useCartStore } from '../../store/cartStore.js';
 
 export default function cart() {
+    const { cart } = useCartStore();
     const { token, isCheckingAuth } = useAuthStore();
     const router = useRouter();
     
@@ -17,8 +17,6 @@ export default function cart() {
 
     }, [token, isCheckingAuth]));
 
-    const { data: cartItems, loading: cartItemsLoading, error: cartItemsError } = useFetch(() => getCartItems(token));
-    
     return (
         <>
             <Header
@@ -26,28 +24,21 @@ export default function cart() {
                 opacity={1}
             />
 
-            { cartItemsLoading ? (
-                <ActivityIndicator
-                    size="large"
-                    color="#0000ff"
-                    className="mt-20 self-center"
-                />
-            ) : cartItemsError ? (
-                <Text className="mt-20">Error: {cartItemsError?.message }</Text>
+            <View className="mt-20 bg-white px-5 pt-3 pb-3 shadow-lg shadow-black">
+                <Text className="text-black text-2xl font-bold mb-1">Shopping Cart</Text>
+            { cart.length === 0 ? (
+                <Text className="text-black text-base">Your cart is currently empty.</Text>
             ) : (
-                <>
-                    <View className="mt-20 bg-white px-5 pt-3 pb-3 shadow-lg shadow-black">
-                        <Text className="text-black text-2xl font-bold mb-1">Shopping Cart</Text>
-                        <Text className="text-black text-base">You have {Array.isArray(cartItems) ? cartItems.length : 0} item{Array.isArray(cartItems) && cartItems.length == 1 ? "" : "s"} in your cart.</Text>
-                    </View>
+                <Text className="text-black text-base">You have {cart.length} item{cart.length == 1 ? "" : "s"} in your cart.</Text>
+            )}
+            </View>
 
+            { cart.length !== 0 && (
                     <FlatList
-                        data={cartItems}
+                        data={cart}
                         keyExtractor={item => item._id}
                         renderItem={({ item }) => <CartItemCard item={item} />}
-                        className="bg-white"
                     />
-                </>
             )}
         </>
     )
