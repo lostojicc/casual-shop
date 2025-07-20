@@ -15,13 +15,13 @@ export const createPaymentIntent = async (req, res) => {
         const products = await Product.find({ _id: { $in: productIds } });
         
         const productMap = products.reduce((map, product) => {
-            map[product._id.toString()] = product;
+            map[product._id] = product;
             return map;
         }, {});
 
         // Calculate total using the fetched product prices
         const totalAmount = cartItems.reduce((total, item) => {
-            const product = productMap[item.product.toString()];
+            const product = productMap[item.product];
             if (!product) {
                 throw new Error(`Product not found: ${item.product}`);
             }
