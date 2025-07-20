@@ -11,11 +11,27 @@ export const createPaymentIntent = async (req, res) => {
         if (!shippingAddress || !shippingAddress.name || !shippingAddress.line1 || !shippingAddress.city || !shippingAddress.postalCode || !shippingAddress.country) 
         return res.status(400).json({ error: 'Shipping address incomplete.' });
 
-        await Promise.all(cartItems.map(async (item) => {
-            const product = await Product.findById(item.product);
-            if (product) item.price = product.price;
-        }));
-        const totalAmount = calculateTotalPrice(cartItems);
+        const productIds = cartItems.map(item => item.product);
+        const products = await Product.find({ _id: { $in: productIds } });
+        
+        const productMap = products.reduce((map, product) => {
+            map[product._id.toString()] = product;
+            return map;
+        }, {});
+
+        // Calculate total using the fetched product prices
+        const totalAmount = cartItems.reduce((total, item) => {
+            const product = productMap[item.product.toString()];
+            if (!product) {
+                throw new Error(`Product not found: ${item.product}`);
+            }
+            return total + (product.price * 100 * item.quantity);
+        }, 0);
+
+        // Validate total amount
+        if (isNaN(totalAmount) || totalAmount <= 0) {
+            return res.status(400).json({ error: 'Invalid total amount calculated.' });
+        }
 
         const paymentIntent = await stripe.paymentIntents.create({
             amount: totalAmount,
@@ -54,10 +70,3 @@ export const createPaymentIntent = async (req, res) => {
 		res.status(500).json({ message: "Error processing checkout", error: error.message });
     }
 };
-
-const calculateTotalPrice = (cartItems) => {
-    return cartItems.reduce((total, item) => {
-        return total + (item.price * 100 * item.quantity);
-    }, 0);
-};
-
