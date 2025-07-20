@@ -14,9 +14,9 @@ export const createPaymentIntent = async (req, res) => {
         console.log(cartItems);
 
         // Validate total amount
-        if (isNaN(totalAmount) || totalAmount <= 0) {
-            return res.status(400).json({ error: 'Invalid total amount calculated.' });
-        }
+        // if (isNaN(totalAmount) || totalAmount <= 0) {
+        //     return res.status(400).json({ error: 'Invalid total amount calculated.' });
+        // }
 
         const paymentIntent = await stripe.paymentIntents.create({
             amount: 5500,
