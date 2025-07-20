@@ -50,7 +50,7 @@ export const createPaymentIntent = async (req, res) => {
                 }
             },
             metadata: {
-                userId: req.user._id.toString(),
+                userId: req.user._id,
                 products: JSON.stringify(
                     cartItems.map(item => ({
                         id: item._id,
