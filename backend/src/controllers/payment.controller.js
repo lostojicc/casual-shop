@@ -11,22 +11,7 @@ export const createPaymentIntent = async (req, res) => {
         if (!shippingAddress || !shippingAddress.name || !shippingAddress.line1 || !shippingAddress.city || !shippingAddress.postalCode || !shippingAddress.country) 
         return res.status(400).json({ error: 'Shipping address incomplete.' });
 
-        const productIds = cartItems.map(item => item.product);
-        const products = await Product.find({ _id: { $in: productIds } });
-        
-        const productMap = products.reduce((map, product) => {
-            map[product._id] = product;
-            return map;
-        }, {});
-
-        // Calculate total using the fetched product prices
-        const totalAmount = cartItems.reduce((total, item) => {
-            const product = productMap[item.product];
-            if (!product) {
-                throw new Error(`Product not found: ${item.product}`);
-            }
-            return total + (product.price * 100 * item.quantity);
-        }, 0);
+        console.log(cartItems);
 
         // Validate total amount
         if (isNaN(totalAmount) || totalAmount <= 0) {
@@ -34,7 +19,7 @@ export const createPaymentIntent = async (req, res) => {
         }
 
         const paymentIntent = await stripe.paymentIntents.create({
-            amount: totalAmount,
+            amount: 5500,
             currency: 'eur',
             automatic_payment_methods: { enabled: true },
             receipt_email: email,
