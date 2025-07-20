@@ -38,9 +38,9 @@ export const createPaymentIntent = async (req, res) => {
                 userId: req.user._id.toString(),
                 products: JSON.stringify(
                     cartItems.map(item => ({
-                        id: item._id,
+                        id: item.product,
                         quantity: item.quantity,
-                        price: item.price
+                        // price: item.price
                     }))
                 )
             }
@@ -48,7 +48,7 @@ export const createPaymentIntent = async (req, res) => {
 
         res.json({
             clientSecret: paymentIntent.client_secret,
-            totalAmount
+            // totalAmount
         });
     } catch (error) {
         console.error("Error processing checkout:", error);

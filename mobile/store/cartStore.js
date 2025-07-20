@@ -3,8 +3,8 @@ import api from "../utils/api.js";
 
 export const useCartStore = create((set, get) => ({
     cart: [],
-    // total: 0,
-    // subtotal: 0,
+    total: 0,
+    subtotal: 0,
     // TODO: coupons
     
     getCartItems: async (token) => {
@@ -37,7 +37,7 @@ export const useCartStore = create((set, get) => ({
 
                 return { cart: newCart }
             });
-            // TODO: calculate totals
+            calculateTotals();
         } catch (error) {
             console.log(error);
         }
@@ -53,7 +53,7 @@ export const useCartStore = create((set, get) => ({
         set((prevState) => ({
             cart: prevState.cart.filter((item) => item._id !== productId)
         }));
-        // TODO: calculate totals
+        calculateTotals();
     },
 
     updateQuantity: async (productId, quantity, token) => {
@@ -70,6 +70,19 @@ export const useCartStore = create((set, get) => ({
         set((prevState) => ({
             cart: prevState.cart.map((item) => (item._id === productId ? { ...item, quantity } : item))
         }));
-        // TODO: calculate totals
-    }
+        calculateTotals();
+    },
+
+    calculateTotals: () => {
+		const { cart } = get();
+		const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+		let total = subtotal;
+
+		// if (coupon) {
+		// 	const discount = subtotal * (coupon.discountPercentage / 100);
+		// 	total = subtotal - discount;
+		// }
+
+		set({ subtotal, total });
+	}
 }));
