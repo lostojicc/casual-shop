@@ -1,4 +1,5 @@
 import { stripe } from "../config/stripe.js";
+import Product from "../models/product.model.js";
 
 export const createPaymentIntent = async (req, res) => {
     try {
@@ -10,6 +11,10 @@ export const createPaymentIntent = async (req, res) => {
         if (!shippingAddress || !shippingAddress.name || !shippingAddress.line1 || !shippingAddress.city || !shippingAddress.postalCode || !shippingAddress.country) 
         return res.status(400).json({ error: 'Shipping address incomplete.' });
 
+        cartItems.map(async (item) => {
+            const product = await Product.findById(item.product);
+            if (product) item.price = product.price;
+        });
         const totalAmount = calculateTotalPrice(cartItems);
 
         const paymentIntent = await stripe.paymentIntents.create({
