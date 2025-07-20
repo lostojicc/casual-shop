@@ -50,11 +50,9 @@ export const createPaymentIntent = async (req, res) => {
     }
 };
 
-const calculateTotalPrice = async (cartItems) => {
-    let totalAmount = 0;
-
-    cartItems.map(item => totalAmount += item.price * 100 * item.quantity);
-
-    return totalAmount;
+const calculateTotalPrice = (cartItems) => {
+    return cartItems.reduce((total, item) => {
+        return total + (item.price * 100 * item.quantity);
+    }, 0);
 };
 
