@@ -1,15 +1,16 @@
 import { useAuthStore } from '@/store/authStore';
 import { useCartStore } from '@/store/cartStore';
 import { Ionicons } from '@expo/vector-icons';
-import { useRoute } from '@react-navigation/native';
-import { useRouter } from 'expo-router';
+// import { useRoute } from '@react-navigation/native';
+import { usePathname, useRouter } from 'expo-router';
 import React from 'react';
 import { Animated, Dimensions, Text, TouchableOpacity, View } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
 
 export default function SideMenu({ isVisible, onClose, animatedValue, onCloseInstantly }) {
-  const currentRoute = useRoute();
+  // const currentRoute = useRoute();
+  const pathname = usePathname();
   const router = useRouter();
   const { user, signOut } = useAuthStore();
   const cart = useCartStore(state => state.cart);
@@ -32,12 +33,15 @@ export default function SideMenu({ isVisible, onClose, animatedValue, onCloseIns
   ];
 
   const isActiveRoute = (route) => {
-    return route === currentRoute.name;
+    // return route === currentRoute.name;
+    // For expo-router, check if pathname ends with the route (for tabs)
+    if (route === '') return pathname === '/' || pathname === '/(tabs)';
+    return pathname.endsWith(`/${route}`);
   };
 
   const navigate = (route) => {
     onCloseInstantly();
-    router.replace(`/${route}`);
+    router.push(`/${route}`);
   }
 
   return (

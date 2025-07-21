@@ -23,7 +23,7 @@ export default function cart() {
     }, [cart, calculateTotals]);
 
     const handleProceedToCheckout = () => {
-        router.push('/checkout');
+        router.push("/(tabs)/checkout");
     };
 
     return (

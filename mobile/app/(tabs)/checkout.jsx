@@ -1,203 +1,200 @@
-import { StripeProvider, useStripe } from '@stripe/stripe-react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useStripe, AppearanceParams } from '@stripe/stripe-react-native';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import Header from '../../components/Header';
+import { Alert, Image, KeyboardAvoidingView, Platform, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import ShippingAddressForm from '../../components/ShippingAddressForm';
-import { useAuthStore } from '../../store/authStore';
-import { useCartStore } from '../../store/cartStore';
-import api from '../../utils/api';
+import { useAuthStore } from '../../store/authStore.js';
+import { useCartStore } from '../../store/cartStore.js';
+import api from '../../utils/api.js';
 
-// Stripe publishable key - you'll need to replace this with your actual key
-const STRIPE_PUBLISHABLE_KEY = 'pk_test_51RmeHG971bRvkqf5ogoCrQ5BzNCZgpTFI08bGFB8XHMRY96r4WAnYxCPzll6MF64LkDQRc2VOxJku0bPD4DAH1AD00lBPH5yFM';
-
-const CheckoutContent = () => {
+export default function Checkout() {
   const { cart, subtotal, total } = useCartStore();
   const { token } = useAuthStore();
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
-  const [loading, setLoading] = useState(false);
-  const [shippingAddress, setShippingAddress] = useState(null);
-  const [step, setStep] = useState('address'); // 'address' or 'payment'
+  const [isInitializing, setIsInitializing] = useState(false);
+  const [clientSecret, setClientSecret] = useState(null);
   const router = useRouter();
 
-  const handleAddressSubmit = (address) => {
-    setShippingAddress(address);
-    setStep('payment');
+  const [step, setStep] = useState(1);
+  const [shippingAddress, setShippingAddress] = useState(null);
+
+  const fetchPaymentIntent = async () => {
+    const { data } = await api.post(
+      '/payment/create-intent',
+      { shippingAddress }, // body if needed
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    if (!data?.client_secret) {
+      throw new Error('Server did not return client_secret');
+    }
+    return data.client_secret;
   };
 
-  const handleCheckout = async () => {
-    if (cart.length === 0) {
-      Alert.alert('Error', 'Your cart is empty');
-      return;
+  const stripeAppearance = {
+    colors: {
+      primary: '#000000',
+      background: "#ffffff",
+      icon: "#000000",
+      componentBorder: '#808080',
+      componentDivider: '#808080',
+      componentBackground: "#ffffff",
+      text: "#000000",
+      primaryText: '#000000',
+      secondaryText: '#000000',
+      componentText: '#000000',
+      placeholderText: '#808080',
+      componentPlaceholderText: '#808080'
+    },
+    shapes: {
+      borderRadius: 0
     }
+  }
 
-    if (!shippingAddress) {
-      Alert.alert('Error', 'Please provide shipping address');
-      return;
-    }
-
-    setLoading(true);
+  const initializePaymentSheet = async () => {
     try {
-      // Create payment intent
-      const response = await api.post('/payment/create-payment-intent', {
-        shippingAddress
-      }, {
-        headers: {
-          'Authorization': `Bearer ${token}`
+        setIsInitializing(true);
+
+        // 1. Get / create PaymentIntent on server
+        const cs = await fetchPaymentIntent();
+        setClientSecret(cs);
+
+        // 2. Initialize PaymentSheet
+        const { error } = await initPaymentSheet({
+            paymentIntentClientSecret: cs,
+            merchantDisplayName: 'Casual Shop',
+            appearance: stripeAppearance
+            // (optional) defaultBillingDetails: { name: 'Jane Doe' },
+            // (optional) allowsDelayedPaymentMethods: true,
+        });
+
+        if (error) {
+            Alert.alert('Init failed', error.message);
+            return;
         }
-      });
 
-      const { clientSecret } = response.data;
+        // 3. Present sheet
+        const { error: presentError } = await presentPaymentSheet();
 
-      // Initialize payment sheet
-      const { error: initError } = await initPaymentSheet({
-        merchantDisplayName: 'Casual Shop',
-        paymentIntentClientSecret: clientSecret,
-        defaultBillingDetails: {
-          name: shippingAddress.name,
-        },
-        appearance: {
-          colors: {
-            primary: '#000000',
-            background: '#FFFFFF',
-            componentBackground: '#FFFFFF',
-            componentBorder: '#000000',
-            componentDivider: '#000000',
-            text: '#000000',
-            textSecondary: '#666666',
-            textPlaceholder: '#999999',
-          },
-          shapes: {
-            borderRadius: 0, // No rounded corners
-            shadow: {
-              color: '#000000',
-              opacity: 0.1,
-              blur: 4,
-              offset: {
-                x: 0,
-                y: 2,
-              },
-            },
-          },
-          primaryButton: {
-            colors: {
-              background: '#000000',
-              text: '#FFFFFF',
-            },
-            shapes: {
-              borderRadius: 0,
-            },
-          },
-        },
-      });
-
-      if (initError) {
-        Alert.alert('Error', initError.message);
-        return;
-      }
-
-      // Present payment sheet
-      const { error: presentError } = await presentPaymentSheet();
-
-      if (presentError) {
-        Alert.alert('Error', presentError.message);
-      } else {
-        Alert.alert('Success', 'Payment completed successfully!');
-        // Clear cart and redirect
-        router.replace('/');
-      }
-    } catch (error) {
-      console.error('Checkout error:', error);
-      Alert.alert('Error', 'Something went wrong with the checkout process');
+        if (presentError) {
+            Alert.alert('Payment failed', presentError.message);
+        } else {
+            Alert.alert('Success', 'Your payment is confirmed!');
+            
+            setClientSecret(null); // clear so a new intent is made next time
+        }
+    } catch (e) {
+        Alert.alert('Error', e.message || 'Something went wrong.');
     } finally {
-      setLoading(false);
+        setIsInitializing(false);
     }
+  };
+
+  // Step 1: handle shipping form submit
+  const handleShippingSubmit = (address) => {
+    setShippingAddress(address);
+    setStep(2);
   };
 
   return (
-    <>
-      <Header isScrolled={true} opacity={1} />
-      
-      <ScrollView className="mt-20 bg-white flex-1">
-        <View className="px-5 pt-3 pb-3 shadow-lg shadow-black">
-          <Text className="text-black text-2xl font-bold mb-1">Checkout</Text>
-          <Text className="text-black text-base">
-            {step === 'address' ? 'Step 1: Shipping Address' : 'Step 2: Payment'}
-          </Text>
-        </View>
 
-        {step === 'address' ? (
-          <ShippingAddressForm onAddressSubmit={handleAddressSubmit} />
-        ) : (
-          <>
-            {/* Cart Items Summary */}
-            <View className="px-5 py-4">
-              <Text className="text-black text-lg font-semibold mb-3">Order Summary</Text>
-              {cart.map((item) => (
-                <View key={item._id} className="flex-row justify-between items-center py-2 border-b border-gray-200">
-                  <View className="flex-1">
-                    <Text className="text-black text-base font-medium">{item.name}</Text>
-                    <Text className="text-gray-600 text-sm">Qty: {item.quantity}</Text>
-                  </View>
-                  <Text className="text-black text-base font-semibold">€{(item.price * item.quantity).toFixed(2)}</Text>
+    <KeyboardAvoidingView
+        className="flex-1 bg-white"
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+    >
+      <View className="flex-row items-center justify-center h-16 shadow-lg shadow-black bg-white w-full">
+      <TouchableOpacity
+        className="absolute left-0 pl-4 h-full justify-center"
+        onPress={() => router.replace('/cart')}
+        hitSlop={{ top: 16, bottom: 16, left: 16, right: 16 }}
+      >
+        <Ionicons name="arrow-back" size={28} color="black" />
+      </TouchableOpacity>
+      <Text className="text-black text-2xl font-bold text-center">Checkout</Text>
+    </View>
+      <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 32 }}>
+        <View className="bg-white w-11/12 mx-auto mt-8 mb-6 shadow-lg shadow-black px-0 py-0 rounded-none">
+            <Text className="text-black text-2xl font-bold px-6 pt-6 pb-2 tracking-tight">Your Order</Text>
+            <View className="divide-y divide-black">
+            {cart.length === 0 ? (
+                <Text className="text-black text-base px-6 py-6">Your cart is empty.</Text>
+            ) : (
+                cart.map((item) => (
+                <View key={item._id} className="flex-row items-center px-6 py-4 bg-white">
+                    <Image source={{ uri: item.image }} className="w-16 h-16 mr-4" style={{ resizeMode: 'cover' }} />
+                    <View className="flex-1 min-w-[80px]">
+                    <Text className="text-xs text-gray-500 mb-1" numberOfLines={1}>{item.brand}</Text>
+                    <Text className="text-base text-black font-semibold mb-1" numberOfLines={2}>{item.name}</Text>
+                    <Text className="text-xs text-gray-500">{item.quantity} × <Text className="text-black font-bold">€{item.price.toFixed(2)}</Text> each</Text>
+                    </View>
+                    <View className="items-end min-w-[80px]">
+                    <Text className="text-black text-lg font-bold">€{(item.price * item.quantity).toFixed(2)}</Text>
+                    </View>
                 </View>
-              ))}
+                ))
+            )}
             </View>
-
-            {/* Shipping Address Summary */}
-            <View className="px-5 py-4 bg-gray-50">
-              <Text className="text-black text-lg font-semibold mb-3">Shipping Address</Text>
-              <Text className="text-black text-base">{shippingAddress.name}</Text>
-              <Text className="text-black text-base">{shippingAddress.line1}</Text>
-              {shippingAddress.line2 && <Text className="text-black text-base">{shippingAddress.line2}</Text>}
-              <Text className="text-black text-base">{shippingAddress.city}, {shippingAddress.postalCode}</Text>
-              <Text className="text-black text-base">{shippingAddress.country}</Text>
-              <Text className="text-black text-base">{shippingAddress.phone}</Text>
-            </View>
-
-            {/* Totals */}
-            <View className="px-5 py-4 bg-gray-50">
-              <View className="flex-row justify-between mb-2">
+            {/* Subtotal and total */}
+            <View className="px-6 pt-4 pb-6 bg-white">
+            <View className="flex-row justify-between mb-1">
                 <Text className="text-black text-base">Subtotal</Text>
                 <Text className="text-black text-base font-semibold">€{subtotal.toFixed(2)}</Text>
-              </View>
-              <View className="flex-row justify-between">
-                <Text className="text-black text-lg font-bold">Total</Text>
-                <Text className="text-black text-lg font-bold">€{total.toFixed(2)}</Text>
-              </View>
             </View>
-
-            {/* Payment Button */}
-            <View className="px-5 py-6">
-              <TouchableOpacity 
-                onPress={handleCheckout}
-                disabled={loading}
-                className={`py-4 px-6 ${loading ? 'bg-gray-400' : 'bg-black'}`}
-                style={{ opacity: loading ? 0.7 : 1 }}
-              >
-                {loading ? (
-                  <View className="flex-row items-center justify-center">
-                    <ActivityIndicator color="white" size="small" />
-                    <Text className="text-white text-base font-semibold ml-2">Processing...</Text>
+            <View className="flex-row justify-between border-t border-black pt-3 mt-2">
+                <Text className="text-black text-xl font-bold">Total</Text>
+                <Text className="text-black text-xl font-bold">€{total.toFixed(2)}</Text>
+            </View>
+            </View>
+        </View>
+        <View className="flex-row w-11/12 mx-auto space-x-2">
+            <TouchableOpacity
+                className={`flex-1 py-3 items-center rounded-none shadow-lg ${step === 1 ? 'bg-black' : 'bg-white shadow-black'}`}
+                onPress={() => setStep(1)}
+            >
+                <Text className={`font-bold text-base ${step === 1 ? 'text-white' : 'text-black'}`}>Step 1: Shipping</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+                className={`flex-1 py-3 items-center rounded-none shadow-lg ${step === 2 ? 'bg-black' : 'bg-white shadow-black'}`}
+                onPress={() => setStep(2)}
+                disabled={!shippingAddress}
+                activeOpacity={!shippingAddress ? 0.7 : 1}
+            >
+                <Text className={`font-bold text-base ${step === 2 ? 'text-white' : 'text-black'}`}>Step 2: Payment</Text>
+            </TouchableOpacity>
+        </View>
+        { step === 1 ? (
+            <View className="w-11/12 mx-auto mb-8 bg-white shadow-lg shadow-black px-6 py-6">
+                <View className="">
+                    <Text className="text-black text-xl font-bold mb-4">Shipping Address</Text>
+                    <ShippingAddressForm onAddressSubmit={handleShippingSubmit} initialAddress={shippingAddress} />
+                </View>
+            </View>
+        ) : (
+            <View className="w-11/12 mx-auto mb-8 bg-white shadow-lg shadow-black px-6 py-6">
+                <Text className="text-black text-xl font-bold mb-4">Payment</Text>
+                {/* Shipping Address Summary */}
+                {shippingAddress && (
+                  <View className="mb-6 bg-white shadow-lg shadow-black px-4 py-4">
+                    <Text className="text-black text-base font-semibold mb-2">Shipping to:</Text>
+                    <Text className="text-black text-base">{shippingAddress.name}</Text>
+                    <Text className="text-black text-base">{shippingAddress.line1}</Text>
+                    {shippingAddress.line2 ? (
+                      <Text className="text-black text-base">{shippingAddress.line2}</Text>
+                    ) : null}
+                    <Text className="text-black text-base">{shippingAddress.city}, {shippingAddress.postalCode}</Text>
+                    <Text className="text-black text-base">{shippingAddress.country}</Text>
                   </View>
-                ) : (
-                  <Text className="text-white text-base font-semibold text-center">
-                    Pay €{total.toFixed(2)}
-                  </Text>
                 )}
-              </TouchableOpacity>
+                <TouchableOpacity
+                className="w-full py-3 bg-black items-center shadow-lg shadow-black rounded-none"
+                onPress={initializePaymentSheet}
+                >
+                    <Text className="text-white font-semibold text-base">Pay €{total.toFixed(2)}</Text>
+                </TouchableOpacity>
             </View>
-          </>
         )}
       </ScrollView>
-    </>
+    </KeyboardAvoidingView>
   );
-};
-
-export default function Checkout() {
-  return (
-    <StripeProvider publishableKey={STRIPE_PUBLISHABLE_KEY}>
-      <CheckoutContent />
-    </StripeProvider>
-  );
-} 
+}

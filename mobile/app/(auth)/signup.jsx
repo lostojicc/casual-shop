@@ -1,9 +1,9 @@
-import { View, Text, Image, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native'
-import React, { useCallback, useState } from 'react'
-import { useAuthStore } from '../../store/authStore';
-import { Link, useFocusEffect, useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
+import { useFocusEffect, useRouter } from 'expo-router';
+import React, { useCallback, useState } from 'react';
+import { Image, KeyboardAvoidingView, Platform, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import PasswordStrengthMeter from '../../components/PasswordStrengthMeter';
+import { useAuthStore } from '../../store/authStore';
 
 const validateEmail = (email) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -86,14 +86,14 @@ const signup = () => {
                 {/* Form */}
                 <View className="mt-10">
                     <View className="mb-6">
-                        <Text className="text-sm font-medium text-gray-900 mb-2">Name</Text>
+                        <Text className="text-black text-base font-semibold mb-1">Name</Text>
                         <TextInput
                             value={name}
                             onChangeText={setName}
                             placeholder="John Doe"
                             keyboardType="default"
                             autoCapitalize="words"
-                            className="w-full rounded-none bg-white px-3 py-2 text-base text-gray-900 border border-gray-300 focus:border-black-600"
+                            className={`w-full rounded-none bg-white px-3 py-2 text-base text-gray-900 border ${errors.name ? 'border-red-500' : 'border-gray-300'} focus:border-black-600`}
                         />
                         {errors.name && (
                             <Text className="text-red-500 text-xs mt-1">{errors.name}</Text>
@@ -101,14 +101,14 @@ const signup = () => {
                     </View>
                     {/* Email field */}
                     <View className="mb-6">
-                        <Text className="text-sm font-medium text-gray-900 mb-2">Email address</Text>
+                        <Text className="text-black text-base font-semibold mb-1">Email address</Text>
                         <TextInput
                             value={email}
                             onChangeText={setEmail}
                             placeholder="you@example.com"
                             keyboardType="email-address"
                             autoCapitalize="none"
-                            className="w-full rounded-none bg-white px-3 py-2 text-base text-gray-900 border border-gray-300 focus:border-black-600"
+                            className={`w-full rounded-none bg-white px-3 py-2 text-base text-gray-900 border ${errors.email ? 'border-red-500' : 'border-gray-300'} focus:border-black-600`}
                         />
                         {errors.email && (
                             <Text className="text-red-500 text-xs mt-1">{errors.email}</Text>
@@ -117,7 +117,7 @@ const signup = () => {
                     {/* Password field */}
                     <View className="mb-6">
                         <View className="flex flex-row justify-between mb-2">
-                            <Text className="text-sm font-medium text-gray-900">Password</Text>
+                            <Text className="text-black text-base font-semibold mb-1">Password</Text>
                         </View>
                         <View className="relative">
                             <TextInput
@@ -125,7 +125,7 @@ const signup = () => {
                                 onChangeText={setPassword}
                                 placeholder="••••••••"
                                 secureTextEntry={!showPassword}
-                                className="w-full rounded-none bg-white px-3 py-2 text-base text-gray-900 border border-gray-300 focus:border-black-600 pr-12"
+                                className={`w-full rounded-none bg-white px-3 py-2 text-base text-gray-900 border ${errors.password ? 'border-red-500' : 'border-gray-300'} focus:border-black-600 pr-12`}
                             />
                             <TouchableOpacity
                                 className="absolute right-3 top-1/2 -translate-y-1/2"
@@ -146,7 +146,7 @@ const signup = () => {
                     {/* Repeat Password field */}
                     <View className="mb-6">
                         <View className="flex flex-row justify-between mb-2">
-                            <Text className="text-sm font-medium text-gray-900">Repeat Password</Text>
+                            <Text className="text-black text-base font-semibold mb-1">Repeat Password</Text>
                         </View>
                         <View className="relative">
                             <TextInput
@@ -154,7 +154,7 @@ const signup = () => {
                                 onChangeText={setRepeatPassword}
                                 placeholder="••••••••"
                                 secureTextEntry={!showRepeatPassword}
-                                className="w-full rounded-none bg-white px-3 py-2 text-base text-gray-900 border border-gray-300 focus:border-black-600 pr-12"
+                                className={`w-full rounded-none bg-white px-3 py-2 text-base text-gray-900 border ${errors.repeatPassword ? 'border-red-500' : 'border-gray-300'} focus:border-black-600 pr-12`}
                             />
                             <TouchableOpacity
                                 className="absolute right-3 top-1/2 -translate-y-1/2"
@@ -177,7 +177,7 @@ const signup = () => {
                         onPress={handleSignUp}
                         disabled={isLoading}
                     >
-                        <Text className="text-white font-semibold text-sm">
+                        <Text className="text-white font-semibold text-base">
                             {isLoading ? "Signing up..." : "Sign up"}
                         </Text>
                     </TouchableOpacity>

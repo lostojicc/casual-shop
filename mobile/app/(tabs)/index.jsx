@@ -16,7 +16,6 @@ import HeroSection from '../../components/HeroSection';
 import useFetch from "../../hooks/useFetch.js";
 import CategoryCard from "../../components/CategoryCard";
 import { getAllCategories } from "../../api/categories.js";
-import { Link } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width, height } = Dimensions.get('window');
