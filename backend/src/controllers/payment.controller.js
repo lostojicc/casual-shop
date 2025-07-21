@@ -36,7 +36,7 @@ export const createIntent = async (req, res) => {
             client_secret: intent.client_secret,
         });
     } catch (err) {
-        res.status(err.statusCode).json({ error: err.message })
+        res.status(500).json({ error: err.message })
     }
 };
 
