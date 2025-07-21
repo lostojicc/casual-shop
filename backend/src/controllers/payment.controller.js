@@ -19,7 +19,7 @@ export const createIntent = async (req, res) => {
         });
         
         const totalAmount = calculateTotalPrice(cartWithPrices);
-        console.log(totalAmount);
+
         var args = {
             amount: totalAmount,
             currency: 'eur',
@@ -37,7 +37,7 @@ export const createIntent = async (req, res) => {
                 phone: req.body.shippingAddress.phone || ''
             },
             metadata: {
-                userId: req.user._id,
+                userId: req.user._id.toString(),
                 products: JSON.stringify(cartWithPrices.map(item => ({
                     id: item._id,
                     quantity: item.quantity,
@@ -58,7 +58,6 @@ export const createIntent = async (req, res) => {
 
 const calculateTotalPrice = (cart) => {
     const totalPrice = cart.reduce((sum, item) => {
-        console.log(item);
         return sum + Math.round(item.price * 100) * item.quantity;
     }, 0);
     return totalPrice;
