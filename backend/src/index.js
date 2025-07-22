@@ -11,7 +11,12 @@ import cors from "cors";
 const app = express();
 connectDB();
 
-app.use(express.json());
+app.use((req, res, next) => {
+  if (req.originalUrl === '/api/payments/success') 
+    next(); 
+  else 
+    express.json()(req, res, next); 
+});
 app.use(cors());
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);

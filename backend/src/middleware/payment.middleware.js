@@ -3,7 +3,7 @@ import { stripe } from "../config/stripe.js";
 
 export const verifyPayment = (req, res, next) => {
     const sig = req.headers["stripe-signature"];
-    
+    console.log(ENV.STRIPE_WEBHOOK_SECRET);
     try {
         req.event = stripe.webhooks.constructEvent(req.body, sig, ENV.STRIPE_WEBHOOK_SECRET);
         next();
