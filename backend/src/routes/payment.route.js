@@ -5,7 +5,7 @@ import { verifyPayment } from "../middleware/payment.middleware.js";
 
 const router = express.Router();
 
-router.post("/create-intent", protectRoute, createIntent);
+router.post("/create-intent", express.json(), protectRoute, createIntent);
 router.post("/success", express.raw({ type: "application/json" }), verifyPayment, onPaymentSuccess);
 
 export default router;

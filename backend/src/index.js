@@ -11,17 +11,12 @@ import cors from "cors";
 const app = express();
 connectDB();
 
-app.use((req, res, next) => {
-  if (req.originalUrl === '/api/payments/success') 
-    next(); 
-  else 
-    express.json()(req, res, next); 
-});
+app.use("/api/payment", paymentRoutes);
+app.use(express.json());
 app.use(cors());
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/cart", cartRoutes);
-app.use("/api/payment", paymentRoutes);
 
 app.listen(ENV.PORT, () => console.log(`Server is running on PORT: ${ENV.PORT}`));
