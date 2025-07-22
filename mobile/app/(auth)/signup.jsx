@@ -51,7 +51,7 @@ const signup = () => {
         setErrors(newErrors);
         if (Object.keys(newErrors).length > 0) return;
         await signUp({ email, password, name });
-        router.push("/verify");
+        router.replace("/verify");
     }
 
     return (

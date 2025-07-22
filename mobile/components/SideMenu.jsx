@@ -115,7 +115,7 @@ export default function SideMenu({ isVisible, onClose, animatedValue, onCloseIns
                     size={20} 
                     color={isActive ? 'black' : 'white'} 
                   />
-                  {item.icon === 'cart' && cart.length > 0 && (
+                  {(item.icon === 'cart' && cart.length > 0 && user) && (
                     <View className={`absolute -top-1 -right-1 w-4 h-4 border ${isActive ? "bg-black border-white" : "bg-white border-black"} rounded-full items-center justify-center`}>
                       <Text className={`text-xs ${isActive ? "text-white" : "text-black"}`}>
                         {cart.length > 99 ? '99+' : cart.length}

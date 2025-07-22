@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useRef, useState } from 'react';
 import { Animated, Dimensions, Text, TouchableOpacity, View } from 'react-native';
-import { useCartStore } from '../store/cartStore';
+import { useCartStore } from '../store/cartStore.js';
 import SideMenu from './SideMenu';
+import { useAuthStore } from '@/store/authStore.js';
 
 const { width, height } = Dimensions.get('window');
 
@@ -10,6 +11,7 @@ export default function Header({ isScrolled = false, opacity = 1, style = {} }) 
   const [isMenuVisible, setIsMenuVisible] = useState(false);
   const menuAnimation = useRef(new Animated.Value(0)).current;
   const cart = useCartStore(state => state.cart);
+  const { user } = useAuthStore();
 
   const toggleMenu = () => {
     if (isMenuVisible) {
@@ -72,7 +74,7 @@ export default function Header({ isScrolled = false, opacity = 1, style = {} }) 
           {/* Hamburger Menu with Cart Badge */}
           <TouchableOpacity className="p-2 relative" onPress={toggleMenu}>
                           <Ionicons name="menu" size={24} color="white" />
-              {cart.length > 0 && (
+              {(cart.length > 0 && user) && (
                 <View className="absolute top-1.5 right-1.5 w-3 h-3 bg-white border border-black rounded-full items-center justify-center">
                 </View>
               )}

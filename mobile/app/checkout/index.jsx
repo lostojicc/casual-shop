@@ -3,7 +3,7 @@ import { useStripe, AppearanceParams } from '@stripe/stripe-react-native';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, Image, KeyboardAvoidingView, Platform, ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import ShippingAddressForm from '../../components/ShippingAddressForm';
+import ShippingAddressForm from '../../components/ShippingAddressForm.jsx';
 import { useAuthStore } from '../../store/authStore.js';
 import { useCartStore } from '../../store/cartStore.js';
 import api from '../../utils/api.js';
@@ -79,8 +79,7 @@ export default function Checkout() {
         if (presentError) {
             Alert.alert('Payment failed', presentError.message);
         } else {
-            Alert.alert('Success', 'Your payment is confirmed!');
-            
+            router.replace("/checkout/success");
             setClientSecret(null); // clear so a new intent is made next time
         }
     } catch (e) {

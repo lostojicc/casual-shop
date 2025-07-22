@@ -84,5 +84,9 @@ export const useCartStore = create((set, get) => ({
 		// }
 
 		set({ subtotal, total });
-	}
+	},
+
+    clearCart: () => {
+		set({ cart: [], total: 0, subtotal: 0 });
+	},
 }));

@@ -41,7 +41,7 @@ const signin = () => {
         const needVerification = await signIn({ email, password });
 
         if (needVerification)
-          router.push("/verify");
+          router.replace("/verify");
         else if (needVerification == false)
           router.back();
     }

@@ -6,7 +6,6 @@ const TabLayout = () => {
     <Tabs screenOptions={{ tabBarStyle: { display: "none" }, headerShown: false }}>
         <Tabs.Screen name="index"/>
         <Tabs.Screen name="cart"/>
-        <Tabs.Screen name="checkout"/>
     </Tabs>
   )
 }
