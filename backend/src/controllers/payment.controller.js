@@ -1,4 +1,5 @@
 import { stripe } from "../config/stripe.js";
+import Order from "../models/order.model.js";
 import Product from "../models/product.model.js";
 
 export const createIntent = async (req, res) => {
@@ -61,4 +62,54 @@ const calculateTotalPrice = (cart) => {
         return sum + Math.round(item.price * 100) * item.quantity;
     }, 0);
     return totalPrice;
-}
+};
+
+export const onPaymentSuccess = async (req, res) => {
+    try {
+        const paymentIntent = req.event.data.object;
+        
+        const products = JSON.parse(paymentIntent.metadata.products);
+        const userId = paymentIntent.metadata.userId;
+        const shipping = paymentIntent.shipping || {};
+        const shippingInfo = {
+            name: shipping.name,
+            phone: shipping.phone,
+            line1: shipping.address?.line1,
+            line2: shipping.address?.line2,
+            city: shipping.address?.city,
+            postalCode: shipping.address?.postal_code,
+            country: shipping.address?.country
+        };
+        const total = paymentIntent.amount / 100;
+
+        const order = await Order.create({
+            user: userId,
+            items: products.map(item => ({
+                product: item.id,
+                quantity: item.quantity,
+                price: item.price
+            })),
+            shipping: {
+                name: shippingInfo.name,
+                phone: shippingInfo.phone,
+                line1: shippingInfo.line1,
+                line2: shippingInfo.line2,
+                city: shippingInfo.city,
+                postalCode: shippingInfo.postalCode,
+                country: shippingInfo.country
+            },
+            total,
+            paymentIntentId: paymentIntent.id
+        });
+
+        res.status(200).json({
+            message: "Payment successful, order created",
+            orderId: order._id
+        })
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).json({
+            message: "Internal server error. Error processing successful checkout."
+        })
+    }
+};
