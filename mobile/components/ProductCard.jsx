@@ -9,7 +9,7 @@ const ProductCard = ({product}) => {
     const { addToCart } = useCartStore();
     const { token } = useAuthStore();
   return (
-    <TouchableOpacity className="w-full h-80 bg-white shadow-lg shadow-black rounded-none overflow-hidden relative">
+    <View className="w-full h-80 bg-white shadow-lg shadow-black rounded-none overflow-hidden relative">
         <View className="h-1/2 w-full">
             <Image
                 source={{ uri: product.image }}
@@ -18,9 +18,9 @@ const ProductCard = ({product}) => {
             />
         </View> 
         <View className="h-1/2 w-full bg-white p-3 justify-between">
-            <Text className="text-xs text-gray-500">{product.brand}</Text>
+            <Text className="text-xs text-gray-500" numberOfLines={1}>{product.brand}</Text>
             <Text className="text-base text-black font-semibold mt-1">{product.name}</Text>
-            <Text className="text-lg text-black-600 font-bold mt-2">${product.price}</Text>
+            <Text className="text-lg text-black-600 font-bold mt-2">€{product.price}</Text>
         </View>
 
         <TouchableOpacity
@@ -29,7 +29,7 @@ const ProductCard = ({product}) => {
         >
             <Ionicons name="cart" size={28} color="white" />
         </TouchableOpacity>
-    </TouchableOpacity>
+    </View>
   )
 }
 

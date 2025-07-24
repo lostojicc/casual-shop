@@ -8,4 +8,9 @@ export const fetchProductsByCategory = async (categoryId) => {
     });
 
     return response.data.products;
+};
+
+export const fetchFeaturedProducts = async () => {
+    const response = await api.get("/products/featured");
+    return response.data;
 }

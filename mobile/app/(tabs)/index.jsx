@@ -1,22 +1,23 @@
-import React, { useState, useRef, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useRef, useState } from 'react';
 import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Animated,
-  Dimensions,
-  StatusBar,
-  ActivityIndicator,
+    ActivityIndicator,
+    Animated,
+    Dimensions,
+    ScrollView,
+    StatusBar,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { getAllCategories } from "../../api/categories.js";
+import { fetchFeaturedProducts } from "../../api/products.js";
 import "../../assets/global.css";
+import CategoryCard from "../../components/CategoryCard";
+import FeaturedProductsCarousel from '../../components/FeaturedProductsCarousel';
 import Header from '../../components/Header.jsx';
 import HeroSection from '../../components/HeroSection';
 import useFetch from "../../hooks/useFetch.js";
-import CategoryCard from "../../components/CategoryCard";
-import { getAllCategories } from "../../api/categories.js";
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width, height } = Dimensions.get('window');
 
@@ -74,9 +75,10 @@ export default function HomePage() {
   };
 
   const { data: categories, loading: categoriesLoading, error: categoriesError } = useFetch(() => getAllCategories());
+  const { data: featuredProducts, loading: featuredProductsLoading, error: featuredProductsError } = useFetch(() => fetchFeaturedProducts());
 
   return (
-    <View className="flex-1 bg-black">
+    <View className="flex-1">
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
       
       {/* Dynamic Header */}
@@ -161,6 +163,19 @@ export default function HomePage() {
                   ))}
             </View>
           )}
+
+        {/* Featured Products Carousel Section */}
+        {featuredProductsLoading ? (
+            <ActivityIndicator />
+        ) : featuredProductsError ? (
+            <Text>Error: {featuredProductsError}</Text>
+        ) : (
+          <View>
+              <Text style={{fontSize: 28, fontWeight: 'bold', color: '#111', marginTop: 32, marginBottom: 8, textAlign: 'center', letterSpacing: 1}}>Featured Products</Text>
+              <FeaturedProductsCarousel products={Array.isArray(featuredProducts) ? featuredProducts : []} />
+          </View>
+        )}
+        
       </ScrollView>
      </View>
   );
