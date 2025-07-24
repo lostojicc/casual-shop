@@ -1,5 +1,5 @@
 import express from "express";
-import { createProduct, deleteProduct, getAllProducts, getProductsByCategory, getSearchedProducts, updateQuantity } from "../controllers/product.controller.js";
+import { createProduct, deleteProduct, getAllProducts, getFeaturedProducts, getProductsByCategory, getSearchedProducts, updateQuantity } from "../controllers/product.controller.js";
 import { adminRoute, protectRoute } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
@@ -10,5 +10,6 @@ router.delete("/:id", protectRoute, adminRoute, deleteProduct);
 router.patch("/update-quantity", protectRoute, adminRoute, updateQuantity);
 router.get("/category", getProductsByCategory);
 router.get("/search", getSearchedProducts);
+router.get("/featured", getFeaturedProducts);
 
 export default router;

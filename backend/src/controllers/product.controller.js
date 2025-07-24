@@ -1,5 +1,6 @@
 import Product from "../models/product.model.js";
 import cloudinary from "../config/cloudinary.js";
+import { redis } from "../config/redis.js";
 
 export const getAllProducts = async (req, res) => {
     try {
@@ -158,3 +159,26 @@ export const getSearchedProducts = async (req, res) => {
         });
     }
 };
+
+export const getFeaturedProducts = async (req, res) => {
+    try {
+        let featuredProducts = await redis.get("featured_products");
+
+        if (featuredProducts)
+            return res.json(JSON.parse(featuredProducts));
+
+        featuredProducts = await Product.find({ isFeatured: true }).lean();
+
+        if (!featuredProducts) 
+			return res.status(404).json({ message: "No featured products found" });
+
+        await redis.set("featured_products", JSON.stringify(featuredProducts));
+        res.json(featuredProducts);
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
+    }
+}
