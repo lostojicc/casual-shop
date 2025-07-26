@@ -29,6 +29,7 @@ export default function SideMenu({ isVisible, onClose, animatedValue, onCloseIns
     { icon: 'home', label: 'Home', route: '' },
     { icon: 'cart', label: 'Cart', route: 'cart' },
     { icon: 'person', label: 'Profile', route: 'profile' },
+    { icon: 'search', label: 'Search', route: 'search' },
     { icon: 'information-circle', label: 'About', route: 'about' }
   ];
 

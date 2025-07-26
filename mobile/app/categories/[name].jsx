@@ -77,7 +77,7 @@ const Category = () => {
             ) : categoryError ? (
                 <Text>Error: {categoryError}</Text>
             ) : (
-                <View className="flex-1 bg-black">
+                <View className="flex-1">
                     <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
                     {/* Dynamic Header */}
                     <Animated.View

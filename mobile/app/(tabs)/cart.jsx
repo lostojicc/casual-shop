@@ -33,7 +33,7 @@ export default function cart() {
                 opacity={1}
             />
 
-            <View className="mt-20 bg-white px-5 pt-3 pb-3 shadow-lg shadow-black">
+            <View className="mt-20 bg-white px-4 py-6 shadow-lg shadow-black">
                 <Text className="text-black text-2xl font-bold mb-1">Shopping Cart</Text>
             { cart.length === 0 ? (
                 <Text className="text-black text-base">Your cart is currently empty.</Text>

@@ -13,4 +13,13 @@ export const fetchProductsByCategory = async (categoryId) => {
 export const fetchFeaturedProducts = async () => {
     const response = await api.get("/products/featured");
     return response.data;
+};
+
+export const fetchSearchProducts = async (search) => {
+    const response = await api.get("/products/search", {
+        params: {
+            search: search
+        }
+    });
+    return response.data.products;
 }

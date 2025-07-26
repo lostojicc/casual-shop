@@ -13,7 +13,7 @@ const CartItemCard = ({ item }) => {
   const { token } = useAuthStore();
 
   return (
-    <View className="flex-row items-center bg-white mx-auto my-4 w-11/12 shadow-lg shadow-black px-2 py-3">
+    <View className="flex-row items-center bg-white mx-auto mt-4 w-11/12 shadow-lg shadow-black px-2 py-3">
       {/* Image */}
       <Image
         source={{ uri: imageUrl }}

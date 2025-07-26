@@ -78,7 +78,7 @@ export default function HomePage() {
   const { data: featuredProducts, loading: featuredProductsLoading, error: featuredProductsError } = useFetch(() => fetchFeaturedProducts());
 
   return (
-    <View className="flex-1">
+    <View className="flex-1 bg-white">
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
       
       {/* Dynamic Header */}
@@ -170,8 +170,8 @@ export default function HomePage() {
         ) : featuredProductsError ? (
             <Text>Error: {featuredProductsError}</Text>
         ) : (
-          <View>
-              <Text style={{fontSize: 28, fontWeight: 'bold', color: '#111', marginTop: 32, marginBottom: 8, textAlign: 'center', letterSpacing: 1}}>Featured Products</Text>
+          <View className='flex mt-10 justify-center items-center'>
+              <Text className='text-black text-2xl font-bold'>Featured Products</Text>
               <FeaturedProductsCarousel products={Array.isArray(featuredProducts) ? featuredProducts : []} />
           </View>
         )}
