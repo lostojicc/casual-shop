@@ -30,7 +30,8 @@ export default function SideMenu({ isVisible, onClose, animatedValue, onCloseIns
     { icon: 'cart', label: 'Cart', route: 'cart' },
     { icon: 'person', label: 'Profile', route: 'profile' },
     { icon: 'search', label: 'Search', route: 'search' },
-    { icon: 'information-circle', label: 'About', route: 'about' }
+    { icon: 'information-circle', label: 'About', route: 'about' },
+    { icon: 'grid', label: 'Dashboard', route: 'admin' }
   ];
 
   const isActiveRoute = (route) => {
@@ -100,6 +101,8 @@ export default function SideMenu({ isVisible, onClose, animatedValue, onCloseIns
         <View className="flex-1 border-t border-white">
           {menuItems.map((item, index) => {
             const isActive = isActiveRoute(item.route);
+            if (item.route === 'admin' && user?.role !== 'admin')
+              return;
             return (
               <TouchableOpacity 
                 key={index}

@@ -1,10 +1,10 @@
-import { Stack } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useAuthStore } from "../store/authStore.js";
-import { useEffect } from "react";
-import { useCartStore } from "../store/cartStore.js";
-import "../assets/global.css";
 import { StripeProvider } from '@stripe/stripe-react-native';
+import { Stack } from "expo-router";
+import { useEffect } from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
+import "../assets/global.css";
+import { useAuthStore } from "../store/authStore.js";
+import { useCartStore } from "../store/cartStore.js";
 
 export default function RootLayout() {
   const { checkAuth, user, token } = useAuthStore();
@@ -28,6 +28,7 @@ export default function RootLayout() {
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="(tabs)"/>
           <Stack.Screen name="(auth)"/>
+          <Stack.Screen name="admin"/>
         </Stack>
       </SafeAreaView>
     </StripeProvider>
