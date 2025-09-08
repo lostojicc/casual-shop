@@ -28,7 +28,7 @@ export const useAuthStore = create((set, get) => ({
         set({ isLoading: true, error: null });
         try {
             const response = await api.post("/auth/signin", credentials);
-
+            
             await AsyncStorage.setItem("accessToken", response.data.token);
             
             set({ user: response.data.user, token: response.data.token, isLoading: false });   
