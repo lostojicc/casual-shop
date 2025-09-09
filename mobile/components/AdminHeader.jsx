@@ -10,7 +10,7 @@ const AdminHeader = ({ title }) => {
     <View className="bg-white px-4 py-6 shadow-lg shadow-black flex-row items-center justify-between">
       <Text className="text-black text-2xl font-bold mb-1">{title}</Text>
       <TouchableOpacity
-        onPress={() => router.back()}
+        onPress={() => router.replace("/")}
         className="p-2"
         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
       >
