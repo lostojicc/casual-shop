@@ -1,15 +1,16 @@
 import { stripe } from "../config/stripe.js";
 import Order from "../models/order.model.js";
 import Product from "../models/product.model.js";
+import User from "../models/user.model.js";
 
 export const createIntent = async (req, res) => {
     try {
         const { shippingAddress } = req.body;
         const cartItems = req.user.cartItems;
-        
+
         const productIds = cartItems.map(item => item._id);
         const products = await Product.find({ _id: { $in: productIds } });
-        
+
         const cartWithPrices = cartItems.map(item => {
             const plainItem = item.toObject();
             const product = products.find(p => p._id.toString() === item._id.toString());
@@ -18,14 +19,14 @@ export const createIntent = async (req, res) => {
                 price: product ? product.price : 0
             }
         });
-        
+
         const totalAmount = calculateTotalPrice(cartWithPrices);
 
         var args = {
             amount: totalAmount,
             currency: 'eur',
             // In the latest version of the API, specifying the `automatic_payment_methods` parameter is optional because Stripe enables its functionality by default.
-            automatic_payment_methods: {enabled: true},
+            automatic_payment_methods: { enabled: true },
             shipping: {
                 name: req.body.shippingAddress.name,
                 address: {
@@ -46,9 +47,9 @@ export const createIntent = async (req, res) => {
                 })))
             }
         };
-        
+
         const intent = await stripe.paymentIntents.create(args);
-        
+
         res.json({
             client_secret: intent.client_secret,
         });
@@ -67,7 +68,7 @@ const calculateTotalPrice = (cart) => {
 export const onPaymentSuccess = async (req, res) => {
     try {
         const paymentIntent = req.event.data.object;
-        
+
         const products = JSON.parse(paymentIntent.metadata.products);
         const userId = paymentIntent.metadata.userId;
         const shipping = paymentIntent.shipping || {};
@@ -102,6 +103,30 @@ export const onPaymentSuccess = async (req, res) => {
             paymentIntentId: paymentIntent.id
         });
 
+        for (const item of order.items) {
+            await Product.findByIdAndUpdate(
+                item.product,
+                { $inc: { quantity: -item.quantity } } 
+            );
+        }
+
+        const productIds = order.items.map(i => i.product);
+        const productsData = await Product.find({ _id: { $in: productIds } });
+
+        const itemsWithProductData = order.items.map(i => {
+            const product = productsData.find(p => p._id.toString() === i.product.toString());
+            return {
+                ...i.toObject(),
+                product: product ? { name: product.name, brand: product.brand } : { name: '', brand: '' }
+            };
+        });
+
+        const user = await User.findById(userId);
+        await sendOrderConfirmationEmail(user.email, {
+            ...order.toObject(),
+            items: itemsWithProductData
+        });
+
         res.status(200).json({
             message: "Payment successful, order created",
             orderId: order._id
@@ -113,3 +138,4 @@ export const onPaymentSuccess = async (req, res) => {
         })
     }
 };
+
