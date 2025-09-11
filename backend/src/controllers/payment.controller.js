@@ -107,7 +107,7 @@ export const onPaymentSuccess = async (req, res) => {
         for (const item of order.items) {
             await Product.findByIdAndUpdate(
                 item.product,
-                { $inc: { quantity: -item.quantity } } 
+                { $inc: { quantity: -item.quantity } }
             );
         }
 
@@ -123,6 +123,8 @@ export const onPaymentSuccess = async (req, res) => {
         });
 
         const user = await User.findById(userId);
+        user.cartItems = [];
+        await user.save();
         await sendOrderConfirmationEmail(user.email, {
             ...order.toObject(),
             items: itemsWithProductData
