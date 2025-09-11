@@ -7,6 +7,7 @@ const TabLayout = () => {
         <Tabs.Screen name="index"/>
         <Tabs.Screen name="cart"/>
         <Tabs.Screen name="search"/>
+        <Tabs.Screen name="profile"/>
     </Tabs>
   )
 }
