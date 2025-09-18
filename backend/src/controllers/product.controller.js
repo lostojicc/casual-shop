@@ -1,4 +1,5 @@
 import Product from "../models/product.model.js";
+import Category from "../models/category.model.js";
 import cloudinary from "../config/cloudinary.js";
 import { redis } from "../config/redis.js";
 
@@ -23,12 +24,14 @@ export const createProduct = async (req, res) => {
         if (image) 
             cloudinaryResponse = await cloudinary.uploader.upload(image, { folder: "products" });
 
+        const cat = await Category.find({ name: category });
+
         const product = await Product.create({
             brand, 
             name, 
             description,
             price,
-            category,
+            category: cat[0]._id,
             image: cloudinaryResponse?.secure_url ? cloudinaryResponse.secure_url : "" 
         });
 
